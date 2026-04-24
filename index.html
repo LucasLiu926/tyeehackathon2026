@@ -1,0 +1,375 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura - Your Anti-Burnout Energy Manager</title>
+  <meta name="description" content="Aura is your personal energy architect. A high-EQ companion helping teens manage energy, identity, and momentum." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-logo">
+      <div class="logo-icon" aria-hidden="true">A</div>
+      <span class="logo-text">aura</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard" id="nav-dashboard" aria-label="Dashboard">
+        <span class="nav-icon">&#9752;</span><span class="nav-label">home</span>
+      </button>
+      <button class="nav-item" data-view="tasks" id="nav-tasks" aria-label="Tasks">
+        <span class="nav-icon">&#9889;</span><span class="nav-label">energy map</span>
+      </button>
+      <button class="nav-item" data-view="schedule" id="nav-schedule" aria-label="Schedule">
+        <span class="nav-icon">&#128249;</span><span class="nav-label">gameplan</span>
+      </button>
+      <button class="nav-item" data-view="journal" id="nav-journal" aria-label="Mood Journal">
+        <span class="nav-icon">&#128221;</span><span class="nav-label">vibe log</span>
+      </button>
+      <button class="nav-item" data-view="chat" id="nav-chat" aria-label="Chat with Aura">
+        <span class="nav-icon">&#128172;</span><span class="nav-label">talk to aura</span>
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="xp-bar-container">
+        <div class="xp-label">
+          <span>balance xp</span>
+          <span id="xp-value">0 / 500</span>
+        </div>
+        <div class="xp-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
+        </div>
+        <div class="xp-level" id="xp-level">Level 1 - Just Getting Started</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content" role="main">
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard" aria-label="Dashboard">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">hey, you.</h1>
+          <p class="view-subtitle" id="greeting-sub">let's see how your energy's looking today.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-ghost" id="checkin-btn" aria-label="Daily check-in">daily check-in</button>
+        </div>
+      </header>
+
+      <div class="battery-card glass-card" role="region" aria-label="Brain Battery">
+        <div class="battery-top">
+          <div class="battery-info">
+            <p class="card-label">brain battery</p>
+            <div class="battery-percent" id="battery-percent">74%</div>
+            <p class="battery-status" id="battery-status">you're in the green zone. solid.</p>
+          </div>
+          <div class="battery-visual" aria-hidden="true">
+            <div class="battery-shell">
+              <div class="battery-fill" id="battery-fill"></div>
+              <div class="battery-glow" id="battery-glow"></div>
+            </div>
+            <div class="battery-tip"></div>
+          </div>
+        </div>
+        <div class="battery-slider-row">
+          <label for="battery-slider" class="sr-only">Adjust brain battery level</label>
+          <input type="range" id="battery-slider" class="battery-slider" min="0" max="100" value="74" aria-label="Brain battery level" />
+          <span class="slider-hint">drag to set your current level</span>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card glass-card" role="region">
+          <div class="stat-icon">&#128293;</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-streak">0</div>
+            <div class="stat-label">day streak</div>
+          </div>
+        </div>
+        <div class="stat-card glass-card" role="region">
+          <div class="stat-icon">&#10003;</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-tasks">0</div>
+            <div class="stat-label">tasks done</div>
+          </div>
+        </div>
+        <div class="stat-card glass-card" role="region">
+          <div class="stat-icon">&#128514;</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-mood">-</div>
+            <div class="stat-label">today's vibe</div>
+          </div>
+        </div>
+        <div class="stat-card glass-card" role="region">
+          <div class="stat-icon">&#9203;</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-sprints">0</div>
+            <div class="stat-label">sprints left</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="aura-message glass-card" role="region" aria-label="Aura's message">
+        <div class="aura-avatar" aria-hidden="true">A</div>
+        <div class="aura-bubble">
+          <p class="aura-name">aura says --</p>
+          <p class="aura-text" id="aura-daily-msg">welcome! add your tasks and let's build your gameplan for today. you've got this.</p>
+        </div>
+      </div>
+
+      <div class="glass-card schedule-preview" role="region" aria-label="Today's schedule preview">
+        <div class="card-header-row">
+          <h2 class="card-title">today's gameplan</h2>
+          <button class="btn-ghost small" data-view="schedule" id="see-full-plan">see full plan &rarr;</button>
+        </div>
+        <div class="timeline" id="dashboard-timeline"></div>
+      </div>
+    </section>
+
+    <!-- ENERGY MAP -->
+    <section class="view" id="view-tasks" aria-label="Energy Map">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">energy map</h1>
+          <p class="view-subtitle">drop your tasks. i'll score the drain + dread so we can plan smart.</p>
+        </div>
+        <button class="btn-primary" id="add-task-btn" aria-label="Add new task">+ add task</button>
+      </header>
+
+      <div class="doom-alert glass-card hidden" id="doom-alert" role="alert" aria-live="polite">
+        <span class="doom-icon">&#9888;</span>
+        <div>
+          <p class="doom-title">doom cluster detected</p>
+          <p class="doom-desc" id="doom-desc">you've got 3 high-drain tasks stacked. let's rearrange before this becomes a spiral.</p>
+        </div>
+        <button class="btn-ghost small" id="doom-fix-btn">fix it &rarr;</button>
+      </div>
+
+      <div class="tasks-grid" id="tasks-grid"></div>
+
+      <div class="modal-overlay hidden" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal glass-card">
+          <h2 class="modal-title" id="modal-title">new task</h2>
+          <div class="form-group">
+            <label for="task-name">what's the task?</label>
+            <input type="text" id="task-name" placeholder="e.g. history essay, math test prep..." autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="task-deadline">deadline</label>
+            <input type="date" id="task-deadline" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-drain">drain score (1-10)</label>
+              <div class="score-slider-wrap">
+                <input type="range" id="task-drain" min="1" max="10" value="5" class="score-slider drain-slider" />
+                <span class="score-display" id="drain-display">5</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="task-dread">dread score (1-10)</label>
+              <div class="score-slider-wrap">
+                <input type="range" id="task-dread" min="1" max="10" value="5" class="score-slider dread-slider" />
+                <span class="score-display" id="dread-display">5</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="task-category">category</label>
+            <select id="task-category">
+              <option value="academic">academic</option>
+              <option value="creative">creative</option>
+              <option value="social">social</option>
+              <option value="physical">physical</option>
+              <option value="personal">personal</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-ghost" id="cancel-task-btn">cancel</button>
+            <button class="btn-primary" id="save-task-btn">add to energy map</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAMEPLAN -->
+    <section class="view" id="view-schedule" aria-label="Gameplan">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">gameplan</h1>
+          <p class="view-subtitle">your sprint + breathe schedule. built around your energy, not the clock.</p>
+        </div>
+        <button class="btn-primary" id="generate-plan-btn" aria-label="Generate plan">generate plan</button>
+      </header>
+
+      <div class="schedule-grid">
+        <div class="schedule-main glass-card" role="region" aria-label="Sprint schedule">
+          <div class="card-header-row">
+            <h2 class="card-title">today's sprints</h2>
+            <div class="legend">
+              <span class="legend-item sprint">sprint</span>
+              <span class="legend-item breathe">breathe</span>
+              <span class="legend-item done">done</span>
+            </div>
+          </div>
+          <div class="full-timeline" id="full-timeline"></div>
+        </div>
+
+        <div class="escape-panel">
+          <div class="glass-card escape-card" role="region" aria-label="Escape hatches">
+            <h3 class="card-title">escape hatches</h3>
+            <div class="escape-item">
+              <div class="escape-label">plan b</div>
+              <p class="escape-text" id="escape-planb">if you hit the wall early, cut the last sprint to 15 min and move it to morning.</p>
+            </div>
+            <div class="escape-item">
+              <div class="escape-label">good enough</div>
+              <p class="escape-text" id="escape-goodenough">80% = essay outline + 2 body paragraphs. that's enough to finish tomorrow.</p>
+            </div>
+            <div class="escape-item">
+              <div class="escape-label">nuclear option</div>
+              <p class="escape-text" id="escape-nuclear">submit what you have. a late penalty beats a zero. talk to your teacher first thing tomorrow.</p>
+            </div>
+          </div>
+
+          <div class="glass-card timer-card" role="region" aria-label="Focus timer">
+            <h3 class="card-title">sprint timer</h3>
+            <div class="timer-display" id="timer-display" aria-live="polite">25:00</div>
+            <div class="timer-label" id="timer-label">sprint - locked in</div>
+            <div class="timer-controls">
+              <button class="btn-ghost small" id="timer-reset" aria-label="Reset timer">reset</button>
+              <button class="btn-primary" id="timer-start" aria-label="Start timer">start</button>
+            </div>
+            <div class="timer-mode-row">
+              <button class="timer-mode active" id="mode-sprint" data-mins="25" aria-pressed="true">25 min sprint</button>
+              <button class="timer-mode" id="mode-short" data-mins="5" aria-pressed="false">5 min breathe</button>
+              <button class="timer-mode" id="mode-long" data-mins="15" aria-pressed="false">15 min reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIBE LOG -->
+    <section class="view" id="view-journal" aria-label="Vibe Log">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">vibe log</h1>
+          <p class="view-subtitle">your mood patterns live here. aura reads them so you don't have to.</p>
+        </div>
+      </header>
+
+      <div class="journal-grid">
+        <div class="glass-card checkin-card" role="region" aria-label="Daily mood check-in">
+          <h2 class="card-title">today's check-in</h2>
+          <p class="card-sub">takes 30 seconds. your future self will thank you.</p>
+          <div class="mood-selector" role="group" aria-label="Battery level">
+            <p class="form-label">how's your battery?</p>
+            <div class="mood-options">
+              <button class="mood-btn" data-mood="green" id="mood-green" aria-label="Green - Good energy" aria-pressed="false"><span class="mood-circle green-circle"></span><span>good</span></button>
+              <button class="mood-btn active" data-mood="yellow" id="mood-yellow" aria-label="Yellow - Medium energy" aria-pressed="true"><span class="mood-circle yellow-circle"></span><span>okay</span></button>
+              <button class="mood-btn" data-mood="orange" id="mood-orange" aria-label="Orange - Low energy" aria-pressed="false"><span class="mood-circle orange-circle"></span><span>low</span></button>
+              <button class="mood-btn" data-mood="red" id="mood-red" aria-label="Red - Drained" aria-pressed="false"><span class="mood-circle red-circle"></span><span>drained</span></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="journal-drain">biggest energy drain today?</label>
+            <input type="text" id="journal-drain" placeholder="e.g. that group project, couldn't focus..." autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="journal-win">one win today? (big or tiny)</label>
+            <input type="text" id="journal-win" placeholder="e.g. actually started the essay, got out for a walk..." autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="journal-sleep">hours of sleep last night?</label>
+            <input type="number" id="journal-sleep" min="0" max="14" step="0.5" placeholder="7.5" />
+          </div>
+          <button class="btn-primary full-width" id="submit-checkin">log it</button>
+        </div>
+
+        <div class="journal-right">
+          <div class="glass-card insight-card" role="region" aria-label="Aura insights">
+            <h3 class="card-title">aura's insight</h3>
+            <p class="insight-text" id="insight-text">log a few days and i'll start spotting your patterns. everyone has a time of day where they crash - let's find yours.</p>
+          </div>
+          <div class="glass-card" role="region" aria-label="Mood history">
+            <h3 class="card-title">this week's vibes</h3>
+            <div class="mood-week" id="mood-week"></div>
+            <div class="mood-chart" id="mood-chart" aria-label="Mood chart for the week"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card journal-history" role="region" aria-label="Journal history">
+        <h2 class="card-title">recent entries</h2>
+        <div class="entries-list" id="entries-list"></div>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="view" id="view-chat" aria-label="Chat with Aura">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">talk to aura</h1>
+          <p class="view-subtitle">vent, ask, plan - i'm here. no judgment.</p>
+        </div>
+        <div class="aura-online">
+          <div class="online-dot" aria-hidden="true"></div>
+          <span>aura is online</span>
+        </div>
+      </header>
+
+      <div class="chat-container" role="region" aria-label="Chat messages">
+        <div class="chat-messages" id="chat-messages" aria-live="polite" aria-atomic="false"></div>
+        <div class="quick-prompts" id="quick-prompts" role="group" aria-label="Quick message prompts">
+          <button class="quick-btn" data-msg="i'm cooked. too much to do and no idea where to start.">i'm cooked</button>
+          <button class="quick-btn" data-msg="i've been procrastinating on something for days and i hate myself for it">procrastination spiral</button>
+          <button class="quick-btn" data-msg="i've been working for 3 hours and feel like i've done nothing">3 hours of nothing</button>
+          <button class="quick-btn" data-msg="i can't sleep because i'm stressed about tomorrow">can't sleep</button>
+          <button class="quick-btn" data-msg="help me make a plan for tonight">make me a plan</button>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" class="chat-input" placeholder="talk to me... what's going on?" aria-label="Type your message" autocomplete="off" />
+          <button class="send-btn" id="send-btn" aria-label="Send message"><span>&uarr;</span></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="modal-overlay hidden" id="checkin-modal" role="dialog" aria-modal="true" aria-labelledby="checkin-modal-title">
+    <div class="modal glass-card checkin-modal-inner">
+      <div class="checkin-emoji" aria-hidden="true">&#9728;</div>
+      <h2 class="modal-title" id="checkin-modal-title">morning check-in</h2>
+      <p class="modal-sub">30 seconds. let's calibrate your day.</p>
+      <div class="mood-selector">
+        <p class="form-label">battery level right now?</p>
+        <div class="mood-options">
+          <button class="mood-btn" data-mood="green" aria-label="Green - Good energy" aria-pressed="false"><span class="mood-circle green-circle"></span><span>charged</span></button>
+          <button class="mood-btn active" data-mood="yellow" aria-label="Yellow - Okay energy" aria-pressed="true"><span class="mood-circle yellow-circle"></span><span>okay</span></button>
+          <button class="mood-btn" data-mood="orange" aria-label="Orange - Low energy" aria-pressed="false"><span class="mood-circle orange-circle"></span><span>low</span></button>
+          <button class="mood-btn" data-mood="red" aria-label="Red - Empty" aria-pressed="false"><span class="mood-circle red-circle"></span><span>empty</span></button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="close-checkin-modal">skip for now</button>
+        <button class="btn-primary" id="confirm-checkin">set my battery</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+  <script src="app.js"></script>
+</body>
+</html>
