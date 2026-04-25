@@ -1,17 +1,16 @@
-const AURA_RESPONSES={
+﻿const AURA_RESPONSES={
   cooked:["yo, that's a LOT. breathe for a sec - we're gonna figure this out.\n\nfirst, brain dump everything on your plate. then we sort by what's actually on fire vs. what just feels urgent.","okay so you're in full overwhelm mode. that's real and it's valid.\n\nhere's the move: pick ONE thing. just one. the smallest possible next step. forget everything else for the next 25 minutes. ready?"],
   procrastination:["procrastination isn't laziness - it's your brain avoiding something that feels too big or too scary. that's actually smart self-protection.\n\nso let's make it smaller. what's the tiniest possible first step? like, embarrassingly tiny?","the spiral is real. here's what i'd try:\n\nset a timer for 10 minutes. work on it badly. seriously - write the worst version. bad work > no work, every time."],
   nothing:["three hours and nothing to show? your brain left the building about 2 hours ago, friend.\n\nreal talk: zombie mode is real. you're not being lazy - you're running on empty.\n\nclose everything. go outside for 5 minutes. not negotiable. your brain literally can't absorb information when it's this fried.","that's zombie mode. you're physically present but mentally checked out.\n\nnew rule: 5-minute outdoor reset FIRST. then come back with a fresh 25-minute sprint on ONE thing. no tabs, no phone."],
   sleep:["not being able to sleep because of stress is one of the worst feelings. your brain won't stop running through the list.\n\nhere's a reset that actually works: write down EVERYTHING stressing you on paper. physically. then close the notebook. your brain needs to know it's been 'saved' somewhere so it can let go.\n\nthen: 4-7-8 breathing. in for 4, hold for 7, out for 8. three rounds.","okay first - tomorrow's problems are tomorrow's. there is literally nothing you can do about them right now.\n\ntry this: box breathing. in for 4 counts, hold for 4, out for 4, hold for 4. repeat 4 times.\n\nyour worth is not your to-do list."],
-  plan:["let's cook.\n\nfirst i need to know: what's the current battery level? (be honest)\n\nthen tell me: what are the top 3 things on your plate right now and when they're due. we'll build around your actual energy, not some perfect version of you.","alright, gameplan time.\n\ntell me: what time is it where you are, and what's actually due in the next 48 hours? let's start there and work backwards."],
-  default:["i hear you. tell me more - what's the biggest thing weighing on you right now?","that sounds heavy. you don't have to figure it all out at once.\n\nwhat's the ONE thing that, if it was handled, would make everything else feel more manageable?","real talk - you came here, which means part of you is already trying to fix it. that counts.\n\nwhat's going on?"]
+  plan:["let's cook.\n\ntell me: what's the top 3 things on your plate right now? we'll build around your actual energy.","alright, gameplan time. what's actually due in the next 48 hours? let's start there."],
+  default:["i hear you. tell me more - what's the biggest thing weighing on you right now?","that sounds heavy. you don't have to figure it all out at once.","real talk - you came here, which means part of you is already trying to fix it. that counts.","what's going on?"]
 };
 
 const defaultTasks=[];
 const defaultSchedule=[];
-const defaultEntries=[];
 
-let state={tasks:[...defaultTasks],schedule:[...defaultSchedule],entries:[...defaultEntries],battery:74,xp:0,streak:0,selectedMood:"yellow",timerRunning:false,timerSeconds:25*60,timerMode:25,timerInterval:null};
+let state={tasks:[...defaultTasks],schedule:[...defaultSchedule],battery:74,xp:0,streak:0,timerRunning:false,timerSeconds:25*60,timerMode:25,timerInterval:null};
 
 function $(id){return document.getElementById(id)}
 
@@ -24,7 +23,6 @@ function navigate(view){
   if(nav)nav.classList.add("active");
   if(view==="tasks")renderTasks();
   if(view==="schedule")renderSchedule();
-  if(view==="journal")renderJournal();
   if(view==="chat")initChat();
 }
 
@@ -37,9 +35,9 @@ function updateBattery(val){
   fill.style.width=pct+"%";
   let color,status;
   if(pct>=70){color="linear-gradient(90deg,#68d391,#9ae6b4)";status="you're in the green zone. solid.";glow.style.background="#68d391"}
-  else if(pct>=40){color="linear-gradient(90deg,#f6e05e,#fbd38d)";status="mid-range. manageable, but let's not push it.";glow.style.background="#f6e05e"}
-  else if(pct>=20){color="linear-gradient(90deg,#f6ad55,#fc8181)";status="getting low. after this sprint, we reset.";glow.style.background="#f6ad55"}
-  else{color="linear-gradient(90deg,#fc8181,#feb2b2)";status="red zone - seriously, stop. recharge first.";glow.style.background="#fc8181"}
+  else if(pct>=40){color="linear-gradient(90deg,#f6e05e,#fbd38d)";status="mid-range. manageable.";glow.style.background="#f6e05e"}
+  else if(pct>=20){color="linear-gradient(90deg,#f6ad55,#fc8181)";status="getting low. take a break soon.";glow.style.background="#f6ad55"}
+  else{color="linear-gradient(90deg,#fc8181,#feb2b2)";status="red zone - seriously, stop. recharge.";glow.style.background="#fc8181"}
   fill.style.background=color;
   $("battery-status").textContent=status;
   $("battery-percent").style.background=color;
@@ -54,12 +52,12 @@ function renderDashboard(){
   const tl=$("dashboard-timeline");
   tl.innerHTML="";
   if(state.schedule.length===0){
-    tl.innerHTML='<p style="color:var(--text2);font-size:14px;padding:12px">no gameplan yet - head to the gameplan tab to generate one!</p>';
+    tl.innerHTML='<p style="color:var(--text2);font-size:14px;padding:12px">no gameplan yet - add some tasks!</p>';
     return;
   }
   state.schedule.slice(0,4).forEach(item=>{
     const div=document.createElement("div");
-    div.className="timeline-item "+(item.done?"done":item.type);
+    div.className="timeline-item "+(item.done?"done":item.type) + (item.category ? " cat-"+item.category : "");
     div.innerHTML=`<span class="timeline-time">${item.time}</span><div class="timeline-content"><div class="timeline-title">${item.done?"[done] ":""}${item.title}</div><div class="timeline-sub">${item.sub}</div></div><span class="timeline-tag ${item.type}">${item.type}</span>`;
     tl.appendChild(div);
   });
@@ -73,36 +71,24 @@ function renderTasks(){
   const grid=$("tasks-grid");
   grid.innerHTML="";
   if(state.tasks.length===0){
-    grid.innerHTML='<div class="glass-card" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)"><p style="font-size:28px;margin-bottom:12px">nothing here yet</p><p style="font-size:15px">hit "+ add task" to start mapping your energy</p></div>';
+    grid.innerHTML='<div class="glass-card" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)"><p style="font-size:28px;margin-bottom:12px">nothing here yet</p><p style="font-size:15px">hit "+ add task" to start mapping your day</p></div>';
     $("doom-alert").classList.add("hidden");
     return;
-  }
-  const highDrain=state.tasks.filter(t=>!t.done&&t.drain>=7);
-  if(highDrain.length>=3){
-    $("doom-alert").classList.remove("hidden");
-    $("doom-desc").textContent=`you've got ${highDrain.length} high-drain tasks stacked. let's rearrange before this becomes a spiral.`;
-  } else {
-    $("doom-alert").classList.add("hidden");
   }
   state.tasks.forEach(task=>{
     const card=document.createElement("div");
     card.className="glass-card task-card";
     card.style.opacity=task.done?"0.6":"1";
     const days=task.deadline?Math.ceil((new Date(task.deadline)-new Date())/(1000*60*60*24)):null;
-    const urgency=days!==null?(days<=1?"[urgent] due today/tomorrow":days<=3?"[soon] due in "+days+"d":"[ok] "+days+"d left"):"no deadline";
+    const urgency=days!==null?(days<=1?"[urgent]":days<=3?"[soon]":"[ok]"):"";
     card.innerHTML=`
       <div class="task-header">
         <div>
           <div class="task-name">${task.done?"[done] ":""}${task.name}</div>
-          <div class="task-deadline">${urgency}</div>
+          <div class="task-deadline">${urgency} ${task.duration} mins</div>
         </div>
         <span class="task-cat-badge" style="background:${getCatColor(task.category)};color:${getCatTextColor(task.category)}">${catLabel[task.category]||task.category}</span>
       </div>
-      <div class="task-scores">
-        <span class="score-pill drain">drain ${task.drain}/10</span>
-        <span class="score-pill dread">dread ${task.dread}/10</span>
-      </div>
-      <div class="task-bar"><div class="task-bar-fill" style="width:${((task.drain+task.dread)/20*100)}%"></div></div>
       <div class="task-actions">
         <button class="task-btn done-btn" onclick="toggleTask(${task.id})">${task.done?"undo":"mark done"}</button>
         <button class="task-btn" onclick="deleteTask(${task.id})">remove</button>
@@ -127,12 +113,12 @@ function renderSchedule(){
   const tl=$("full-timeline");
   tl.innerHTML="";
   if(state.schedule.length===0){
-    tl.innerHTML='<p style="color:var(--text2);font-size:14px;padding:16px">hit "generate plan" to build your sprint + breathe schedule</p>';
+    tl.innerHTML='<p style="color:var(--text2);font-size:14px;padding:16px">add some tasks to build your schedule</p>';
     return;
   }
   state.schedule.forEach((item,i)=>{
     const div=document.createElement("div");
-    div.className="timeline-item "+(item.done?"done":item.type);
+    div.className="timeline-item "+(item.done?"done":item.type) + (item.category ? " cat-"+item.category : "");
     div.innerHTML=`<span class="timeline-time">${item.time}</span><div class="timeline-content"><div class="timeline-title">${item.done?"[done] ":""}${item.title}</div><div class="timeline-sub">${item.sub}</div></div><span class="timeline-tag ${item.type}">${item.type}</span>`;
     div.style.cursor="pointer";
     div.addEventListener("click",()=>{
@@ -146,7 +132,6 @@ function renderSchedule(){
 
 function formatSchedTime(minutesOffset){
   const now=new Date();
-  // Start from the next 15-min boundary at or after current time, minimum 3 PM
   let startH=now.getHours()<15?15:now.getHours();
   let startM=now.getHours()<15?0:Math.ceil(now.getMinutes()/15)*15;
   if(startM>=60){startH++;startM=0;}
@@ -160,20 +145,10 @@ function formatSchedTime(minutesOffset){
 }
 
 const BREATHE_POOL=[
-  {title:"5-min outdoor reset",sub:"no screen. fresh air. not optional.",mins:5},
-  {title:"snack + stretch",sub:"eat something real. move your body a little.",mins:10},
-  {title:"10-min no-screen break",sub:"phone down. just exist for a minute.",mins:10},
-  {title:"quick walk",sub:"even around the block. your brain needs oxygen.",mins:8},
-  {title:"breathe + hydrate",sub:"drink water. 4 deep breaths. you're doing great.",mins:5}
+  {title:"5-min outdoor reset",sub:"no screen. fresh air.",mins:5},
+  {title:"snack + stretch",sub:"eat something real.",mins:10},
+  {title:"10-min no-screen break",sub:"phone down. just exist.",mins:10}
 ];
-
-const SPRINT_SUB={
-  academic:"timer on. full focus. no extra tabs.",
-  creative:"let the ideas flow - don't judge what comes out yet.",
-  social:"get this handled so it stops living in your head.",
-  physical:"show up. that's the whole job.",
-  personal:"this one's for you. take it seriously."
-};
 
 function generatePlan(){
   const active=state.tasks.filter(t=>!t.done);
@@ -181,45 +156,33 @@ function generatePlan(){
     state.schedule=[];
     renderSchedule();
     renderDashboard();
-    if(state.tasks.length>0){
-      showToast("all tasks done - you're actually finished!","success");
-      $("aura-daily-msg").textContent="all tasks done. that's genuinely impressive. rest now - you earned it.";
-    } else {
-      $("aura-daily-msg").textContent="welcome! add your tasks and i'll build your gameplan automatically.";
-    }
+    $("aura-daily-msg").textContent="welcome! add your tasks and i'll build your gameplan automatically.";
     return;
   }
 
-  // Sort: most urgent (soonest deadline) first, then highest drain
   const sorted=[...active].sort((a,b)=>{
     const dA=a.deadline?Math.ceil((new Date(a.deadline)-new Date())/86400000):999;
     const dB=b.deadline?Math.ceil((new Date(b.deadline)-new Date())/86400000):999;
-    if(dA!==dB)return dA-dB;
-    return b.drain-a.drain;
+    return dA-dB;
   });
-
-  // Sprint length adapts to battery level
-  const sprintLen=state.battery>=70?25:state.battery>=40?20:15;
 
   const blocks=[];
   let elapsed=0;
   let bIdx=0;
 
   sorted.forEach((task,i)=>{
-    const sub=SPRINT_SUB[task.category]||"timer on. let's get it.";
-    const days=task.deadline?Math.ceil((new Date(task.deadline)-new Date())/86400000):null;
-    const urgencyNote=days!==null?(days<=0?" - DUE TODAY":days===1?" - due tomorrow":` - due in ${days}d`):"";
+    const duration = parseInt(task.duration) || 25;
     blocks.push({
       time:formatSchedTime(elapsed),
-      title:task.name+urgencyNote,
-      sub:sprintLen+"-min sprint. "+sub,
+      title:task.name,
+      sub:duration+"-min sprint.",
       type:"sprint",
+      category: task.category,
       done:false,
       taskId:task.id
     });
-    elapsed+=sprintLen;
+    elapsed+=duration;
 
-    // Add breathe block between sprints
     if(i<sorted.length-1){
       const b=BREATHE_POOL[bIdx%BREATHE_POOL.length];bIdx++;
       blocks.push({time:formatSchedTime(elapsed),title:b.title,sub:b.sub,type:"breathe",done:false});
@@ -227,93 +190,12 @@ function generatePlan(){
     }
   });
 
-  // Hard stop at the end
-  blocks.push({time:formatSchedTime(elapsed),title:"HARD STOP - you're done",sub:"rest is productive. seriously.",type:"breathe",done:false});
+  blocks.push({time:formatSchedTime(elapsed),title:"HARD STOP",sub:"you're done for today.",type:"breathe",done:false});
 
   state.schedule=blocks;
   renderSchedule();
   renderDashboard();
-  const msg=state.battery>=70
-    ?"battery's solid - locked in "+sprintLen+"-min sprints. click any block to mark it done."
-    :state.battery>=40
-    ?"mid-range battery, so "+sprintLen+"-min sprints with breathe blocks built in. don't skip the breaks."
-    :"battery's low - keeping sprints to "+sprintLen+" min with extra recovery. pacing beats grinding.";
-  $("aura-daily-msg").textContent=msg;
-}
-
-function renderJournal(){
-  renderMoodWeek();
-  renderEntries();
-  renderInsight();
-}
-
-function renderMoodWeek(){
-  const days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  const moodColors={green:"#68d391",yellow:"#f6e05e",orange:"#f6ad55",red:"#fc8181",none:"rgba(255,255,255,0.1)"};
-  const weekEl=$("mood-week");
-  const chartEl=$("mood-chart");
-  weekEl.innerHTML="";chartEl.innerHTML="";
-  const recentMoods=state.entries.slice(0,7).reverse();
-  days.forEach((d,i)=>{
-    const entry=recentMoods[i];
-    const color=entry?moodColors[entry.mood]:moodColors.none;
-    const dayDiv=document.createElement("div");
-    dayDiv.className="mood-day";
-    dayDiv.innerHTML=`<span class="mood-day-label">${d}</span><div class="mood-day-dot" style="background:${color}"></div>`;
-    weekEl.appendChild(dayDiv);
-    const moodVal={green:90,yellow:65,orange:40,red:20,none:0};
-    const bar=document.createElement("div");
-    bar.className="mood-bar";
-    bar.style.background=color;
-    bar.style.height=(entry?moodVal[entry.mood]:10)+"%";
-    bar.style.opacity=entry?"1":"0.2";
-    chartEl.appendChild(bar);
-  });
-}
-
-function renderEntries(){
-  const list=$("entries-list");
-  list.innerHTML="";
-  if(state.entries.length===0){
-    list.innerHTML='<p style="color:var(--text2);font-size:14px;padding:12px">no entries yet - do your first check-in above!</p>';
-    return;
-  }
-  const moodColors={green:"#68d391",yellow:"#f6e05e",orange:"#f6ad55",red:"#fc8181"};
-  const moodLabels={green:"charged",yellow:"okay",orange:"low",red:"drained"};
-  state.entries.forEach(e=>{
-    const div=document.createElement("div");
-    div.className="entry-item";
-    div.innerHTML=`<div class="entry-dot" style="background:${moodColors[e.mood]||"#fff"}"></div><div class="entry-info"><div class="entry-date">${e.date} - ${moodLabels[e.mood]||e.mood}</div><div class="entry-text">drain: ${e.drain} | win: ${e.win}</div></div><div class="entry-sleep">sleep ${e.sleep}h</div>`;
-    list.appendChild(div);
-  });
-}
-
-function renderInsight(){
-  const el=$("insight-text");
-  if(state.entries.length===0){el.textContent="log a few days and i'll start spotting your patterns. everyone has a time of day where they crash - let's find yours.";return;}
-  const orangeRed=state.entries.filter(e=>e.mood==="orange"||e.mood==="red");
-  const avgSleep=state.entries.reduce((a,e)=>a+e.sleep,0)/state.entries.length;
-  if(orangeRed.length>=2)el.textContent="heads up - you've been in the low-energy zone "+orangeRed.length+" times recently. that's a pattern worth noticing. what's eating your battery most?";
-  else if(avgSleep<6.5)el.textContent="your average sleep is "+avgSleep.toFixed(1)+"h. that's below what your brain needs to actually retain stuff. even one extra hour would change how monday feels.";
-  else el.textContent="you're doing better than you think. keep logging and i'll get better at spotting your patterns - everyone has a time of day where they crash. let's find yours.";
-}
-
-function submitCheckin(){
-  const drain=$("journal-drain").value||"nothing specific";
-  const win=$("journal-win").value||"showed up";
-  const sleep=parseFloat($("journal-sleep").value)||7;
-  const now=new Date();
-  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  state.entries.unshift({date:months[now.getMonth()]+" "+now.getDate(),mood:state.selectedMood,drain,win,sleep});
-  state.xp+=40;
-  state.streak+=1;
-  updateXP();
-  renderJournal();
-  renderDashboard();
-  showToast("vibe logged! +40 balance xp","success");
-  $("journal-drain").value="";
-  $("journal-win").value="";
-  $("journal-sleep").value="";
+  $("aura-daily-msg").textContent="built your gameplan based on your tasks. different categories are color-coded!";
 }
 
 function updateXP(){
@@ -338,7 +220,7 @@ function initTimer(){
     else{state.timerRunning=true;$("timer-start").textContent="pause";
       timerInterval=setInterval(()=>{
         if(state.timerSeconds>0){state.timerSeconds--;const m=Math.floor(state.timerSeconds/60);const s=state.timerSeconds%60;$("timer-display").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
-        else{clearInterval(timerInterval);state.timerRunning=false;$("timer-start").textContent="start";showToast("timer done! time to breathe","success");state.xp+=20;updateXP()}
+        else{clearInterval(timerInterval);state.timerRunning=false;$("timer-start").textContent="start";showToast("timer done!","success");state.xp+=20;updateXP()}
       },1000);}
   });
   $("timer-reset").addEventListener("click",()=>{
@@ -354,7 +236,7 @@ function initTimer(){
       clearInterval(timerInterval);state.timerRunning=false;state.timerSeconds=mins*60;
       $("timer-display").textContent=String(mins).padStart(2,"0")+":00";
       $("timer-start").textContent="start";
-      const labels={25:"sprint - locked in",5:"breathe - you earned it",15:"reset - zero tech"};
+      const labels={25:"sprint - locked in",5:"breathe",15:"reset"};
       $("timer-label").textContent=labels[mins]||"";
     });
   });
@@ -362,18 +244,18 @@ function initTimer(){
 
 function getAuraResponse(msg){
   const m=msg.toLowerCase();
-  if(m.includes("cooked")||m.includes("overwhelm")||m.includes("too much")||m.includes("can't do")){return AURA_RESPONSES.cooked[Math.floor(Math.random()*AURA_RESPONSES.cooked.length)]}
-  if(m.includes("procrastinat")||m.includes("spiral")||m.includes("avoiding")){return AURA_RESPONSES.procrastination[Math.floor(Math.random()*AURA_RESPONSES.procrastination.length)]}
-  if(m.includes("nothing")||m.includes("3 hours")||m.includes("zombie")){return AURA_RESPONSES.nothing[Math.floor(Math.random()*AURA_RESPONSES.nothing.length)]}
-  if(m.includes("sleep")||m.includes("can't sleep")||m.includes("awake")){return AURA_RESPONSES.sleep[Math.floor(Math.random()*AURA_RESPONSES.sleep.length)]}
-  if(m.includes("plan")||m.includes("schedule")||m.includes("gameplan")){return AURA_RESPONSES.plan[Math.floor(Math.random()*AURA_RESPONSES.plan.length)]}
+  if(m.includes("cooked")||m.includes("overwhelm")||m.includes("too much")){return AURA_RESPONSES.cooked[Math.floor(Math.random()*AURA_RESPONSES.cooked.length)]}
+  if(m.includes("procrastinat")||m.includes("spiral")){return AURA_RESPONSES.procrastination[Math.floor(Math.random()*AURA_RESPONSES.procrastination.length)]}
+  if(m.includes("nothing")||m.includes("zombie")){return AURA_RESPONSES.nothing[Math.floor(Math.random()*AURA_RESPONSES.nothing.length)]}
+  if(m.includes("sleep")){return AURA_RESPONSES.sleep[Math.floor(Math.random()*AURA_RESPONSES.sleep.length)]}
+  if(m.includes("plan")||m.includes("schedule")){return AURA_RESPONSES.plan[Math.floor(Math.random()*AURA_RESPONSES.plan.length)]}
   return AURA_RESPONSES.default[Math.floor(Math.random()*AURA_RESPONSES.default.length)];
 }
 
 let chatInited=false;
 function initChat(){
   if(chatInited)return;chatInited=true;
-  addChatMsg("aura","hey - i'm aura, your personal energy architect.\n\nnot here to guilt-trip you about productivity. here to help you actually get through your week without burning out.\n\nwhat's going on?");
+  addChatMsg("aura","hey - i'm aura. what's on your mind today?");
 }
 
 function addChatMsg(from,text){
@@ -404,8 +286,8 @@ function setupMoodBtns(container){
     btn.addEventListener("click",()=>{
       container.querySelectorAll(".mood-btn").forEach(b=>{b.classList.remove("active");b.setAttribute("aria-pressed","false")});
       btn.classList.add("active");btn.setAttribute("aria-pressed","true");
-      state.selectedMood=btn.dataset.mood;
-      updateBattery({green:85,yellow:60,orange:35,red:15}[state.selectedMood]||60);
+      const mood=btn.dataset.mood;
+      updateBattery({green:85,yellow:60,orange:35,red:15}[mood]||60);
       $("battery-slider").value=state.battery;
     });
   });
@@ -427,21 +309,18 @@ document.addEventListener("DOMContentLoaded",()=>{
     $("task-deadline").valueAsDate=new Date(Date.now()+86400000*2);
   });
 
-  $("task-drain").addEventListener("input",e=>$("drain-display").textContent=e.target.value);
-  $("task-dread").addEventListener("input",e=>$("dread-display").textContent=e.target.value);
-
   $("cancel-task-btn").addEventListener("click",()=>$("task-modal").classList.add("hidden"));
   $("task-modal").addEventListener("click",e=>{if(e.target===$("task-modal"))$("task-modal").classList.add("hidden")});
 
   $("save-task-btn").addEventListener("click",()=>{
     const name=$("task-name").value.trim();
-    if(!name){showToast("give the task a name first!","error");return;}
-    state.tasks.push({id:Date.now(),name,deadline:$("task-deadline").value,drain:parseInt($("task-drain").value),dread:parseInt($("task-dread").value),category:$("task-category").value,done:false});
-    $("task-modal").classList.add("hidden");$("task-name").value="";
+    const duration = $("task-duration").value;
+    if(!name || !duration){showToast("fill in name and duration!","error");return;}
+    state.tasks.push({id:Date.now(),name,deadline:$("task-deadline").value,duration,category:$("task-category").value,done:false});
+    $("task-modal").classList.add("hidden");$("task-name").value="";$("task-duration").value="";
     generatePlan();
     renderTasks();
-    showToast("task added - gameplan updated!","success");
-    // Pulse the gameplan nav to hint the user
+    showToast("task added!","success");
     const schedNav=$("nav-schedule");
     schedNav.style.background="rgba(183,148,246,0.35)";
     setTimeout(()=>{schedNav.style.background="";},1200);
@@ -451,9 +330,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("see-full-plan")&&$("see-full-plan").addEventListener("click",()=>navigate("schedule"));
 
   initTimer();
-
-  setupMoodBtns(document.querySelector("#view-journal"));
-  $("submit-checkin").addEventListener("click",submitCheckin);
 
   $("send-btn").addEventListener("click",()=>sendChatMsg($("chat-input").value));
   $("chat-input").addEventListener("keydown",e=>{if(e.key==="Enter")sendChatMsg($("chat-input").value)});
@@ -465,16 +341,16 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("close-checkin-modal").addEventListener("click",()=>$("checkin-modal").classList.add("hidden"));
   $("confirm-checkin").addEventListener("click",()=>{
     $("checkin-modal").classList.add("hidden");
-    showToast("battery calibrated! let's cook","success");
+    showToast("battery calibrated!","success");
   });
   setupMoodBtns($("checkin-modal"));
 
   $("doom-fix-btn")&&$("doom-fix-btn").addEventListener("click",()=>{
     navigate("schedule");generatePlan();
-    showToast("doom cluster fixed - schedule redistributed","success");
+    showToast("schedule redistributed","success");
   });
 
-  const greetings=["let's see how your energy's looking today.","what are we tackling today?","your brain is a muscle. let's not overtrain it.","rest is productive. remember that today."];
+  const greetings=["let's see how your energy's looking.","what are we tackling?","your brain is a muscle.","rest is productive."];
   $("greeting-sub").textContent=greetings[new Date().getDay()%greetings.length];
 
   updateXP();

@@ -11,11 +11,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-orbs" aria-hidden="true">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
+<body>
 
   <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
     <div class="sidebar-logo">
@@ -31,9 +27,6 @@
       </button>
       <button class="nav-item" data-view="schedule" id="nav-schedule" aria-label="Schedule">
         <span class="nav-icon">&#128249;</span><span class="nav-label">gameplan</span>
-      </button>
-      <button class="nav-item" data-view="journal" id="nav-journal" aria-label="Mood Journal">
-        <span class="nav-icon">&#128221;</span><span class="nav-label">vibe log</span>
       </button>
       <button class="nav-item" data-view="chat" id="nav-chat" aria-label="Chat with Aura">
         <span class="nav-icon">&#128172;</span><span class="nav-label">talk to aura</span>
@@ -174,18 +167,8 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="task-drain">drain score (1-10)</label>
-              <div class="score-slider-wrap">
-                <input type="range" id="task-drain" min="1" max="10" value="5" class="score-slider drain-slider" />
-                <span class="score-display" id="drain-display">5</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="task-dread">dread score (1-10)</label>
-              <div class="score-slider-wrap">
-                <input type="range" id="task-dread" min="1" max="10" value="5" class="score-slider dread-slider" />
-                <span class="score-display" id="dread-display">5</span>
-              </div>
+              <label for="task-duration">how many minutes? (e.g. 25, 45)</label>
+              <input type="number" id="task-duration" placeholder="25" min="1" max="240" />
             </div>
           </div>
           <div class="form-group">
@@ -264,61 +247,6 @@
       </div>
     </section>
 
-    <!-- VIBE LOG -->
-    <section class="view" id="view-journal" aria-label="Vibe Log">
-      <header class="view-header">
-        <div>
-          <h1 class="view-title">vibe log</h1>
-          <p class="view-subtitle">your mood patterns live here. aura reads them so you don't have to.</p>
-        </div>
-      </header>
-
-      <div class="journal-grid">
-        <div class="glass-card checkin-card" role="region" aria-label="Daily mood check-in">
-          <h2 class="card-title">today's check-in</h2>
-          <p class="card-sub">takes 30 seconds. your future self will thank you.</p>
-          <div class="mood-selector" role="group" aria-label="Battery level">
-            <p class="form-label">how's your battery?</p>
-            <div class="mood-options">
-              <button class="mood-btn" data-mood="green" id="mood-green" aria-label="Green - Good energy" aria-pressed="false"><span class="mood-circle green-circle"></span><span>good</span></button>
-              <button class="mood-btn active" data-mood="yellow" id="mood-yellow" aria-label="Yellow - Medium energy" aria-pressed="true"><span class="mood-circle yellow-circle"></span><span>okay</span></button>
-              <button class="mood-btn" data-mood="orange" id="mood-orange" aria-label="Orange - Low energy" aria-pressed="false"><span class="mood-circle orange-circle"></span><span>low</span></button>
-              <button class="mood-btn" data-mood="red" id="mood-red" aria-label="Red - Drained" aria-pressed="false"><span class="mood-circle red-circle"></span><span>drained</span></button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="journal-drain">biggest energy drain today?</label>
-            <input type="text" id="journal-drain" placeholder="e.g. that group project, couldn't focus..." autocomplete="off" />
-          </div>
-          <div class="form-group">
-            <label for="journal-win">one win today? (big or tiny)</label>
-            <input type="text" id="journal-win" placeholder="e.g. actually started the essay, got out for a walk..." autocomplete="off" />
-          </div>
-          <div class="form-group">
-            <label for="journal-sleep">hours of sleep last night?</label>
-            <input type="number" id="journal-sleep" min="0" max="14" step="0.5" placeholder="7.5" />
-          </div>
-          <button class="btn-primary full-width" id="submit-checkin">log it</button>
-        </div>
-
-        <div class="journal-right">
-          <div class="glass-card insight-card" role="region" aria-label="Aura insights">
-            <h3 class="card-title">aura's insight</h3>
-            <p class="insight-text" id="insight-text">log a few days and i'll start spotting your patterns. everyone has a time of day where they crash - let's find yours.</p>
-          </div>
-          <div class="glass-card" role="region" aria-label="Mood history">
-            <h3 class="card-title">this week's vibes</h3>
-            <div class="mood-week" id="mood-week"></div>
-            <div class="mood-chart" id="mood-chart" aria-label="Mood chart for the week"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card journal-history" role="region" aria-label="Journal history">
-        <h2 class="card-title">recent entries</h2>
-        <div class="entries-list" id="entries-list"></div>
-      </div>
-    </section>
 
     <!-- CHAT -->
     <section class="view" id="view-chat" aria-label="Chat with Aura">
@@ -368,9 +296,8 @@
 
         <div class="glass-card guide-card">
           <div class="guide-icon">&#9889;</div>
-          <h2 class="guide-title">2. drain score vs. dread score</h2>
-          <p class="guide-text" style="margin-bottom: 12px;"><strong>Drain Score (1-10):</strong> How much mental energy a task takes. A heavy math test might be a 9. Replying to an email might be a 2.</p>
-          <p class="guide-text"><strong>Dread Score (1-10):</strong> How much you're avoiding it. High dread means high friction. If a task has a dread of 10, break it down until it feels like a 3.</p>
+          <h2 class="guide-title">2. time + category</h2>
+          <p class="guide-text">just tell aura how long a task will take and what category it's in. different categories get different colors in your gameplan, so you can see at a glance what your day looks like.</p>
         </div>
 
         <div class="glass-card guide-card">
