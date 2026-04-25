@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -37,6 +37,9 @@
       </button>
       <button class="nav-item" data-view="chat" id="nav-chat" aria-label="Chat with Aura">
         <span class="nav-icon">&#128172;</span><span class="nav-label">talk to aura</span>
+      </button>
+      <button class="nav-item" data-view="guide" id="nav-guide" aria-label="How to use">
+        <span class="nav-icon">&#128214;</span><span class="nav-label">how it works</span>
       </button>
     </nav>
     <div class="sidebar-bottom">
@@ -343,6 +346,45 @@
           <input type="text" id="chat-input" class="chat-input" placeholder="talk to me... what's going on?" aria-label="Type your message" autocomplete="off" />
           <button class="send-btn" id="send-btn" aria-label="Send message"><span>&uarr;</span></button>
         </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="view" id="view-guide" aria-label="How it works">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">how it works &#128214;</h1>
+          <p class="view-subtitle">a quick guide to managing your energy, not just your time.</p>
+        </div>
+      </header>
+      
+      <div class="guide-grid">
+        
+        <div class="glass-card guide-card">
+          <div class="guide-icon">&#128267;</div>
+          <h2 class="guide-title">1. energy > time</h2>
+          <p class="guide-text">aura doesn't care how many hours you work. it cares about how much <strong>brain battery</strong> you have left. forcing yourself to work when you're at 5% is how you burn out. we prioritize rest as much as productivity.</p>
+        </div>
+
+        <div class="glass-card guide-card">
+          <div class="guide-icon">&#9889;</div>
+          <h2 class="guide-title">2. drain score vs. dread score</h2>
+          <p class="guide-text" style="margin-bottom: 12px;"><strong>Drain Score (1-10):</strong> How much mental energy a task takes. A heavy math test might be a 9. Replying to an email might be a 2.</p>
+          <p class="guide-text"><strong>Dread Score (1-10):</strong> How much you're avoiding it. High dread means high friction. If a task has a dread of 10, break it down until it feels like a 3.</p>
+        </div>
+
+        <div class="glass-card guide-card">
+          <div class="guide-icon">&#128249;</div>
+          <h2 class="guide-title">3. the gameplan (sprint + breathe)</h2>
+          <p class="guide-text">based on your battery, aura generates a gameplan. you do a <strong>sprint</strong> (locked in focus), followed by a mandatory <strong>breathe</strong> block (stretching, water, no screens). don't skip the breathe blocks.</p>
+        </div>
+
+        <div class="glass-card guide-card">
+          <div class="guide-icon">&#128221;</div>
+          <h2 class="guide-title">4. the vibe log</h2>
+          <p class="guide-text">your energy isn't random. by logging your mood, sleep, and drains, aura starts to find your patterns. it will tell you when you're most likely to crash so you can plan around it.</p>
+        </div>
+
       </div>
     </section>
 

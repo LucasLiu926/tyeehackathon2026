@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 :root{--navy:#0a0e27;--navy2:#0f1535;--lavender:#b794f6;--lavender2:#9b6dff;--amber:#f6ad55;--amber2:#ed8936;--green:#68d391;--red:#fc8181;--orange:#f6ad55;--glass:rgba(255,255,255,0.05);--glass2:rgba(255,255,255,0.08);--border:rgba(255,255,255,0.1);--text:#e2e8f0;--text2:#a0aec0;--radius:16px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;display:flex;overflow:hidden}
@@ -204,3 +204,12 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
 .orange-circle{background:#f6ad55}
 .red-circle{background:#fc8181}
 .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#9b6dff,#f6ad55);display:flex;align-items:center;justify-content:center;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:18px;color:#fff}
+
+/* Guide Styles */
+.guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-bottom:24px}
+.guide-card{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(183,148,246,0.15);background:linear-gradient(180deg,var(--glass),transparent)}
+.guide-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2);border-color:rgba(183,148,246,0.4)}
+.guide-icon{font-size:32px;margin-bottom:8px;background:linear-gradient(135deg,var(--lavender),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
+.guide-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
+.guide-text{font-size:14px;line-height:1.7;color:var(--text2)}
+.guide-text strong{color:var(--lavender);font-weight:600}
