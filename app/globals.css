@@ -185,6 +185,10 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
 .form-group input:focus,.form-group select:focus{border-color:var(--lavender)}
 .form-group select option{background:var(--navy2);color:var(--text)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.duration-quick-picks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.duration-chip{background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;padding:6px 14px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s}
+.duration-chip:hover{background:var(--glass2);color:var(--text)}
+.duration-chip.active{background:rgba(183,148,246,.18);border-color:var(--lavender);color:var(--lavender)}
 .score-slider-wrap{display:flex;align-items:center;gap:12px}
 .score-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:99px;background:var(--glass2);outline:none;cursor:pointer}
 .score-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;cursor:pointer}

@@ -74,6 +74,7 @@ export default function Page() {
   const [toasts, setToasts] = useState([]);
   const [mood, setMood] = useState("normal");
   const chatScroll = useRef(null);
+  const calendarScroll = useRef(null);
 
   const MOODS = [
     { id: "great", emoji: "😄", label: "great" },
@@ -93,6 +94,25 @@ export default function Page() {
   useEffect(() => {
     if (chatScroll.current) chatScroll.current.scrollTop = chatScroll.current.scrollHeight;
   }, [chat]);
+
+  useEffect(() => {
+    if (view !== "tasks" || !calendarScroll.current) return;
+    const now = new Date();
+    const isViewingToday = isSameDay(calendarDate, now);
+    if (!isViewingToday) {
+      calendarScroll.current.scrollTop = 0;
+      return;
+    }
+    const hr = now.getHours() + now.getMinutes() / 60;
+    if (hr < 16 || hr > 22) {
+      calendarScroll.current.scrollTop = 0;
+      return;
+    }
+    const ratio = (hr - 16) / 6;
+    const el = calendarScroll.current;
+    const target = ratio * el.scrollHeight - el.clientHeight * 0.3;
+    el.scrollTop = Math.max(0, target);
+  }, [view, calendarDate, aiSchedule]);
 
   function showToast(msg, type = "success") {
     const id = Date.now() + Math.random();
@@ -442,7 +462,7 @@ export default function Page() {
                 <button className="cal-nav-btn" onClick={() => setCalendarDate(new Date(calendarDate.getTime() + 86400000))}>→</button>
               </div>
 
-              <div className="calendar-hours">
+              <div className="calendar-hours" ref={calendarScroll}>
                 <div className="cal-grid">
                   {Array.from({ length: 6 }, (_, i) => 16 + i).map((h) => (
                     <div className="cal-hour-row" key={h}>
@@ -653,8 +673,20 @@ export default function Page() {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>how many minutes? (e.g. 25, 45)</label>
-                <input type="number" value={taskDuration} onChange={(e) => setTaskDuration(e.target.value)} placeholder="25" min="1" max="240" />
+                <label>how many minutes?</label>
+                <div className="duration-quick-picks">
+                  {[15, 25, 45, 60, 90].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      className={`duration-chip ${String(taskDuration) === String(mins) ? "active" : ""}`}
+                      onClick={() => setTaskDuration(String(mins))}
+                    >
+                      {mins >= 60 ? (mins === 60 ? "1 hr" : `${mins / 60} hr`) : `${mins} min`}
+                    </button>
+                  ))}
+                </div>
+                <input type="number" value={taskDuration} onChange={(e) => setTaskDuration(e.target.value)} placeholder="or type a custom number" min="1" max="240" />
               </div>
             </div>
             <div className="modal-actions">
