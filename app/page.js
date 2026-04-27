@@ -61,6 +61,7 @@ function fmtTimeRange(start, end) {
 
 export default function Page() {
   const [view, setView] = useState("chat");
+  const [entered, setEntered] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [aiSchedule, setAiSchedule] = useState({});
@@ -123,6 +124,23 @@ export default function Page() {
     showToast("task removed", "warning");
   }
 
+  function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+  async function streamAuraMessage(fullText, suggestedTasks = []) {
+    if (!fullText) return;
+    const id = Date.now() + Math.random();
+    setChat((c) => [...c, { id, from: "aura", text: "", streaming: true, suggestedTasks: [] }]);
+    const len = fullText.length;
+    const total = Math.min(700, Math.max(280, len * 8));
+    const stepSize = Math.max(1, Math.ceil(len / (total / 18)));
+    for (let i = stepSize; i <= len; i += stepSize) {
+      const slice = fullText.slice(0, i);
+      setChat((c) => c.map((m) => (m.id === id ? { ...m, text: slice } : m)));
+      await sleep(18);
+    }
+    setChat((c) => c.map((m) => (m.id === id ? { ...m, text: fullText, streaming: false, suggestedTasks } : m)));
+  }
+
   async function runPlanner(triggeringMsg, taskList) {
     const activeTasks = (taskList || tasks).filter((t) => !t.done);
     if (activeTasks.length === 0) {
@@ -144,7 +162,7 @@ export default function Page() {
       const data = await res.json();
       const dateKey = todayISO();
       setAiSchedule((s) => ({ ...s, [dateKey]: data.blocks || [] }));
-      setChat((c) => [...c, { from: "aura", text: data.message || "here's your evening - check the calendar." }]);
+      await streamAuraMessage(data.message || "here's your evening - check the calendar.");
       showToast("calendar updated", "success");
       setView("tasks");
     } catch {
@@ -211,7 +229,7 @@ export default function Page() {
       }
 
       const showSuggestions = !wantsSchedule;
-      setChat((c) => [...c, { from: "aura", text: data.reply, suggestedTasks: showSuggestions ? filteredSuggestions : [] }]);
+      await streamAuraMessage(data.reply || "", showSuggestions ? filteredSuggestions : []);
 
       if (wantsSchedule) {
         const totalMins = mergedTasks.filter((t) => !t.done).reduce((sum, t) => sum + (parseInt(t.duration) || 0), 0);
@@ -219,7 +237,7 @@ export default function Page() {
         if (totalMins > FIT_LIMIT) {
           wantsSchedule = false;
           const hrs = Math.round(totalMins / 6) / 10;
-          setChat((c) => [...c, { from: "aura", text: `quick pause — that's about ${hrs} hours of focused work, and tonight's window only fits ~4.5 hours after dinner, shower, and breaks.\n\nwhat feels right:\n• shave one task (e.g. SAT prep → 1 hour instead of 2)?\n• move one to tomorrow?\n• split a longer task across two evenings?\n\ntell me which and i'll adjust.` }]);
+          await streamAuraMessage(`quick pause — that's about ${hrs} hours of focused work, and tonight's window only fits ~4.5 hours after dinner, shower, and breaks.\n\nwhat feels right:\n• shave one task (e.g. SAT prep → 1 hour instead of 2)?\n• move one to tomorrow?\n• split a longer task across two evenings?\n\ntell me which and i'll adjust.`);
           showToast("too much for one evening — let's tradeoff", "warning");
         }
       }
@@ -313,6 +331,23 @@ export default function Page() {
     }
   }
 
+  if (!entered) {
+    return (
+      <div className="landing">
+        <div className="landing-glow" aria-hidden="true"></div>
+        <div className="landing-inner">
+          <div className="landing-logo">
+            <div className="logo-icon landing-logo-icon">A</div>
+            <span className="landing-logo-text">aura</span>
+          </div>
+          <h1 className="landing-title">your evening, gently arranged.</h1>
+          <p className="landing-sub">a quiet companion for tasks, energy, and rest. no pressure — just a plan that fits how you actually feel.</p>
+          <button className="btn-primary landing-cta" onClick={() => setEntered(true)}>get started</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <aside className="sidebar">
@@ -334,12 +369,20 @@ export default function Page() {
             <span className="nav-label">how to use</span>
           </button>
         </nav>
+        <div className="sidebar-mood" onClick={() => setView("chat")} title="change mood">
+          <span className="sidebar-mood-emoji">{(MOODS.find((m) => m.id === mood) || MOODS[2]).emoji}</span>
+          <div className="sidebar-mood-meta">
+            <span className="sidebar-mood-label">today</span>
+            <span className="sidebar-mood-value">{(MOODS.find((m) => m.id === mood) || MOODS[2]).label}</span>
+          </div>
+        </div>
       </aside>
 
       <main className="main-content">
         <section className={`view ${view === "tasks" ? "active" : ""}`}>
           <header className="view-header">
             <div>
+              <span className="eyebrow">today<span className="eyebrow-dot"></span>4 PM – 10 PM</span>
               <h1 className="view-title">energy map</h1>
               <p className="view-subtitle">drop your tasks. ask aura to arrange your evening.</p>
             </div>
@@ -355,20 +398,35 @@ export default function Page() {
                   <p className="empty-sub">add a task to begin shaping your evening — or just say hi to aura.</p>
                 </div>
               ) : (
-                tasks.map((t) => (
-                  <div key={t.id} className="glass-card task-card" style={{ opacity: t.done ? 0.6 : 1 }}>
-                    <div className="task-header">
-                      <div>
-                        <div className="task-name">{t.done ? "[done] " : ""}{t.name}</div>
-                        <div className="task-deadline">{fmtDuration(t.duration)}</div>
+                tasks.map((t) => {
+                  const cat = t.category || "personal";
+                  const dueDate = t.deadline ? new Date(t.deadline + "T00:00:00") : null;
+                  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+                  let dueLabel = "today";
+                  if (dueDate) {
+                    const diffDays = Math.round((dueDate - todayStart) / 86400000);
+                    if (diffDays === 0) dueLabel = "today";
+                    else if (diffDays === 1) dueLabel = "tomorrow";
+                    else if (diffDays > 1) dueLabel = `in ${diffDays}d`;
+                    else dueLabel = "overdue";
+                  }
+                  return (
+                    <div key={t.id} className={`glass-card task-card cat-${cat}${t.done ? " is-done" : ""}`}>
+                      <div className="task-rail" aria-hidden="true"></div>
+                      <div className="task-header">
+                        <div>
+                          <div className="task-name">{t.name}</div>
+                          <div className="task-deadline">{fmtDuration(t.duration)}</div>
+                        </div>
+                        <span className={`task-due-chip ${dueLabel === "overdue" ? "overdue" : ""}`}>{dueLabel}</span>
+                      </div>
+                      <div className="task-actions">
+                        <button className="task-btn done-btn" onClick={() => toggleTask(t.id)}>{t.done ? "undo" : "mark done"}</button>
+                        <button className="task-btn" onClick={() => deleteTask(t.id)}>remove</button>
                       </div>
                     </div>
-                    <div className="task-actions">
-                      <button className="task-btn done-btn" onClick={() => toggleTask(t.id)}>{t.done ? "undo" : "mark done"}</button>
-                      <button className="task-btn" onClick={() => deleteTask(t.id)}>remove</button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
@@ -434,7 +492,11 @@ export default function Page() {
                   </div>
                 </div>
                 {blocks.length === 0 && (
-                  <div className="cal-empty">{isToday ? "no tasks scheduled for today" : "no tasks on this day"}</div>
+                  <div className="cal-empty">
+                    <div className="cal-empty-emoji">🌙</div>
+                    <div className="cal-empty-title">{isToday ? "tonight is open" : "nothing on this day"}</div>
+                    <div className="cal-empty-sub">{isToday ? "add a task or ask aura to plan something." : ""}</div>
+                  </div>
                 )}
               </div>
             </aside>
@@ -444,6 +506,7 @@ export default function Page() {
         <section className={`view ${view === "chat" ? "active" : ""}`}>
           <header className="view-header">
             <div>
+              <span className="eyebrow">companion<span className="eyebrow-dot"></span>always here</span>
               <h1 className="view-title">talk to aura</h1>
               <p className="view-subtitle">vent, ask, plan - i'm here. no judgment.</p>
             </div>
@@ -480,7 +543,7 @@ export default function Page() {
                 <div key={i} className={`chat-msg ${m.from}`}>
                   <div className={`msg-avatar ${m.from === "aura" ? "aura-av" : "user-av"}`}>{m.from === "aura" ? "A" : "U"}</div>
                   <div className="msg-bubble">
-                    <div dangerouslySetInnerHTML={{ __html: m.text.replace(/\n/g, "<br>") }} />
+                    <div dangerouslySetInnerHTML={{ __html: m.text.replace(/\n/g, "<br>") + (m.streaming ? '<span class="stream-caret">▍</span>' : "") }} />
                     {m.suggestedTasks && m.suggestedTasks.length > 0 && (
                       <div className="suggested-tasks">
                         {m.suggestedTasks.map((s, j) => (
@@ -522,6 +585,7 @@ export default function Page() {
         <section className={`view ${view === "guide" ? "active" : ""}`}>
           <header className="view-header">
             <div>
+              <span className="eyebrow">getting started<span className="eyebrow-dot"></span>quick tour</span>
               <h1 className="view-title">how to use</h1>
               <p className="view-subtitle">a quick tour of everything aura can do.</p>
             </div>
