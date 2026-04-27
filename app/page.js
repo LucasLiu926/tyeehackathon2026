@@ -389,13 +389,6 @@ export default function Page() {
             <span className="nav-label">how to use</span>
           </button>
         </nav>
-        <div className="sidebar-mood" onClick={() => setView("chat")} title="change mood">
-          <span className="sidebar-mood-emoji">{(MOODS.find((m) => m.id === mood) || MOODS[2]).emoji}</span>
-          <div className="sidebar-mood-meta">
-            <span className="sidebar-mood-label">today</span>
-            <span className="sidebar-mood-value">{(MOODS.find((m) => m.id === mood) || MOODS[2]).label}</span>
-          </div>
-        </div>
       </aside>
 
       <main className="main-content">
